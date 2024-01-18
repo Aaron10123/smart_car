@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include <Servo.h>
 
-//-----------------------全域變數區-----------------------//
-// A1~A5為紅外線數值
+/*################################變數宣告區################################*/
+// IR sansor A1~A5
 int IR[5] = {A1, A2, A3, A4, A5};
 // 速度控制:左邊馬達為PWM5，右邊馬達為PWM6
 int mL = 5;
@@ -10,163 +10,368 @@ int mR = 6;
 // 方向控制:左邊馬達為4，右邊馬達為7
 int sL = 4;
 int sR = 7;
-
-Servo claw; // 宣告claw為伺服馬達
-
-//-----------------------指令宣告區-----------------------//
-
-void motor(int, int);    // 控制馬達的函式
-void IR_test();          // 紅外線測試函式
-void forward();          // 前進函式
-void small_turn_left();  // 小轉彎左轉函式
-void small_turn_right(); // 小轉彎右轉函式
-void big_turn_left();    // 大轉彎左轉函式
-void big_turn_right();   // 大轉彎右轉函式
-void stop();             // 停止函式
-void trail();            // 循跡函式
-
-//-----------------------初始化-----------------------//
-void setup()
+Servo claw; // 爪子伺服馬達
+unsigned long duration_time_diff;
+/*################################函數宣告區################################*/
+void motor(int, int);
+void trail();
+void small_turn_left();
+void small_turn_right();
+void mid_turn_left();
+void mid_turn_right();
+void big_turn_left();
+void big_turn_right();
+void forward();
+void stop();
+void back();
+void re_turn();
+void return_to_line();
+void trail_cross();
+bool cross();
+void my_init();
+void pickup_middle();
+void pickup_left();
+void pickup_right();
+void pick_up();
+void pick_down();
+/*################################程式初始化################################*/
+void setup() // 程式初始化
 {
-    Serial.begin(9600);
-    // 將IR設定為輸入
+    my_init();
+    trail_cross();
+
+    pickup_middle(); // 取貨點(中)
+
+    back();
+    delay(500);
+    re_turn();
+    delay(550);
+    return_to_line();
+    delay(100);
+
+    pickup_left(); // 取貨點(左)
+
+    back();
+    delay(500);
+    re_turn();
+    delay(550);
+    return_to_line();
+    delay(100);
+
+    pickup_right(); // 取貨點(右)
+
+    back();
+    delay(500);
+    re_turn();
+    delay(550);
+    return_to_line();
+    delay(100);
+}
+
+/*################################程式循環################################*/
+void loop() // 程式循環
+{
+    pickup_middle(); // 取貨點(中)
+
+    back();
+    delay(500);
+    re_turn();
+    delay(550);
+    return_to_line();
+    delay(100);
+
+    pickup_left(); // 取貨點(左)
+
+    back();
+    delay(500);
+    re_turn();
+    delay(550);
+    return_to_line();
+    delay(100);
+
+    pickup_right(); // 取貨點(右)
+
+    back();
+    delay(500);
+    re_turn();
+    delay(550);
+    return_to_line();
+    delay(100);
+}
+
+/*################################函數定義區################################*/
+
+void pick_up()
+{
+    claw.write(100); // 調整爪子角度範例
+}
+void pick_down()
+{
+    claw.write(40); // 調整爪子角度範例
+}
+void pickup_middle()
+{
+    /*################前往第一個取貨點(中)################*/
+    pick_down();
+    // trail_cross(); // 循跡到中間十字路口
+
+    // 繼續前進直到IR1~IR3全部小於450，到達取貨點
+    while (!(analogRead(IR[1]) < 450 and analogRead(IR[2]) < 450 and analogRead(IR[3]) < 450))
+    {
+        trail();
+        if (analogRead(IR[1]) < 450 and analogRead(IR[2]) < 450 and analogRead(IR[3]) < 450)
+        {
+            stop();
+            delay(100);
+        }
+    }
+    stop();
+
+    /*################到達第一個取貨點(中)################*/
+
+    pick_up();
+    delay(500);
+
+    /*################前往卸貨點################*/
+    return_to_line(); // 迴轉回到黑線上
+    trail_cross();    // 循跡到中間十字路口
+    trail_cross();    // 循跡到卸貨T字路口
+    stop();
+    /*################到達卸貨點################*/
+    pick_down();
+}
+
+void pickup_left()
+{
+    /*################前往第二個取貨點(左)################*/
+    pick_down();
+    // trail_cross();
+    delay(100);
+    while (!((analogRead(IR[0]) > 450)))
+    {
+        big_turn_left();
+    }
+    stop();
+    delay(100);
+    duration_time_diff = millis();
+    while (!(millis() - duration_time_diff >= 500))
+    {
+        trail();
+    }
+    stop();
+    while (!((analogRead(IR[1]) < 450) and (analogRead(IR[2]) < 450) and (analogRead(IR[3]) < 450)))
+    {
+        trail();
+        if (analogRead(IR[1]) < 450 and analogRead(IR[2]) < 450 and analogRead(IR[3]) < 450)
+        {
+            stop();
+            delay(100);
+        }
+    }
+    stop();
+    /*################到達第二個取貨點(左)################*/
+    pick_up();
+    delay(500);
+
+    /*################前往卸貨點################*/
+    return_to_line();
+    trail_cross();
+    big_turn_right();
+    delay(250);
+    while (!(analogRead(IR[4]) > 450))
+    {
+        big_turn_right();
+    }
+    stop();
+    trail_cross(); // 循跡到卸貨T字路口
+    stop();
+    /*################到達卸貨點################*/
+    pick_down();
+}
+
+void pickup_right()
+{
+    pick_down();
+    // trail_cross();
+    delay(100);
+    while (!((analogRead(IR[4]) > 450)))
+    {
+        big_turn_right();
+    }
+    stop();
+    delay(100);
+    duration_time_diff = millis();
+    while (!(millis() - duration_time_diff >= 500))
+    {
+        trail();
+    }
+    stop();
+    while (!((analogRead(IR[1]) < 450) and (analogRead(IR[2]) < 450) and (analogRead(IR[3]) < 450)))
+    {
+        trail();
+        if (analogRead(IR[1]) < 450 and analogRead(IR[2]) < 450 and analogRead(IR[3]) < 450)
+        {
+            stop();
+            delay(100);
+        }
+    }
+    stop();
+    /*################到達第三個取貨點(右)################*/
+    pick_up();
+    delay(500);
+    /*################前往卸貨點################*/
+    return_to_line();
+    trail_cross();
+    big_turn_left();
+    delay(250);
+    while (!(analogRead(IR[0]) > 450))
+    {
+        big_turn_left();
+    }
+    stop();
+    trail_cross(); // 循跡到卸貨T字路口
+    stop();
+    /*################到達卸貨點################*/
+    pick_down();
+}
+
+void my_init()
+{
     for (int i = 0; i < 5; i++)
     {
-        pinMode(IR[i], INPUT); // 數值為0~1023，白色為0，黑色為1023
+        pinMode(IR[i], INPUT);
     }
-    // 將mL和mR設定為輸出
+
     pinMode(mL, OUTPUT);
     pinMode(mR, OUTPUT);
-    // 將sL和sR設定為輸出
-    pinMode(sL, OUTPUT); // HIGH為正轉，LOW為反轉
-    pinMode(sR, OUTPUT); // HIGH為正轉，LOW為反轉
+    pinMode(sL, OUTPUT);
+    pinMode(sR, OUTPUT);
 
-    claw.attach(9); // 將claw設定為3腳位
+    claw.attach(9);
 }
 
-//-----------------------主程式-----------------------//
-void loop()
+void return_to_line()
 {
-    claw.write(50); // 伺服馬達轉到0度
-    delay(1000);
-    claw.write(95); // 伺服馬達轉到90度
-    delay(1000);
-    // claw.write(180); // 伺服馬達轉到180度
-    // delay(1000);
-    // claw.write(90); // 伺服馬達轉到90度
-    // delay(3000);
+    while (!(analogRead(IR[0]) > 450))
+    {
+        re_turn();
+    }
+    stop();
 }
 
-//-----------------------函式區-----------------------//
+void trail_cross()
+{
+    while (!cross())
+    {
+        trail();
+    }
+    while (!(analogRead(IR[1]) < 450 or analogRead(IR[2]) < 450 or analogRead(IR[3]) < 450))
+    {
+        forward();
+    }
+    stop();
+}
 
-/*
-循跡程式
-*/
 void trail()
 {
     if (analogRead(IR[2]) > 450)
     {
         if (analogRead(IR[1]) > 450)
         {
-            small_turn_left(); // 小轉彎左轉函式
+            small_turn_left();
         }
         else if (analogRead(IR[3]) > 450)
         {
-            small_turn_right(); // 小轉彎右轉函式
+            small_turn_right();
         }
-        else
+        else if (analogRead(IR[1]) < 450 and analogRead(IR[3]) < 450)
+
         {
-            forward(); // 前進函式
+            forward();
         }
     }
     else
     {
         if (analogRead(IR[1]) > 450)
         {
-            while (!(analogRead(IR[2]) > 450))
-            {
-                big_turn_left(); // 大轉彎左轉函式
-            }
+            mid_turn_left();
         }
         else if (analogRead(IR[3]) > 450)
         {
-            while (!(analogRead(IR[2]) > 450))
-            {
-                big_turn_right(); // 大轉彎右轉函式
-            }
+            mid_turn_right();
         }
     }
 }
 
-/*
-控制馬達的函式
-speedL=左邊馬達的速度(-255 to 255)
-speedR=右邊馬達的速度(-255 to 255)
-*/
-void motor(int speedL, int speedR)
+bool cross()
 {
-    // digitalWrite(sL, speedL < 0 ? LOW : HIGH);
-    if (speedL < 0)
+    // 判斷IR1~IR3有沒有同時大於450，如果有的話就停止
+
+    if (analogRead(IR[1]) > 450 and analogRead(IR[2]) > 450 and analogRead(IR[3]) > 450)
     {
-        digitalWrite(sL, LOW);
+        stop();
+        return true;
     }
     else
     {
-        digitalWrite(sL, HIGH);
+        return false;
     }
-    // digitalWrite(sR, speedR < 0 ? LOW : HIGH);
-    if (speedR < 0)
-    {
-        digitalWrite(sR, LOW);
-    }
-    else
-    {
-        digitalWrite(sR, HIGH);
-    }
-    analogWrite(mL, abs(speedL));
-    analogWrite(mR, abs(speedR));
 }
 
-void small_turn_left() // 小轉彎左轉函式
-{
-    motor(0, 100);
-}
-
-void small_turn_right() // 小轉彎右轉函式
-{
-    motor(100, 0);
-}
-
-void big_turn_left() // 大轉彎左轉函式
-{
-    motor(-100, 100);
-}
-
-void big_turn_right() // 大轉彎右轉函式
-{
-    motor(100, -100);
-}
-
-void stop() // 停止函式
-{
-    motor(0, 0);
-}
-
-void forward() // 前進函式
+void forward()
 {
     motor(100, 100);
 }
 
-/*
-紅外線測試函式
-*/
-void IR_test()
+void back()
 {
-    // 顯示IR的數值
-    for (int i = 0; i < 5; i++)
-    {
-        Serial.print(analogRead(IR[i]));
-        Serial.print(" ");
-    }
-    Serial.println();
+    motor(-100, -100);
+}
+void small_turn_left()
+{
+    motor(80, 100);
+}
+
+void small_turn_right()
+{
+    motor(100, 80);
+}
+
+void mid_turn_left()
+{
+    motor(0, 100);
+}
+void mid_turn_right()
+{
+    motor(100, 0);
+}
+
+void big_turn_left()
+{
+    motor(-120, 100);
+}
+
+void big_turn_right()
+{
+    motor(100, -120);
+}
+
+void stop()
+{
+    motor(0, 0);
+}
+
+void re_turn()
+{
+    motor(-120, 75);
+}
+
+void motor(int speedL, int speedR)
+{
+    // 判斷speedL跟speedR正負號決定方向
+    digitalWrite(sL, speedL < 0 ? LOW : HIGH); // 左邊馬達方向設定
+    digitalWrite(sR, speedR < 0 ? LOW : HIGH); // 右邊馬達方向設定
+
+    analogWrite(mL, abs(speedL)); // 左邊馬達速度設定
+    analogWrite(mR, abs(speedR)); // 右邊馬達速度設定
 }
