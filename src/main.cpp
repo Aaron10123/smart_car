@@ -63,7 +63,7 @@ void setup() // 程式初始化
     re_turn();
     delay(550);
     return_to_line();
-    delay(100);
+    delay(75);
     pick_down_2();
     delay(100);
 
@@ -72,7 +72,7 @@ void setup() // 程式初始化
     back();
     delay(450);
     re_turn();
-    delay(550);
+    delay(540);
     return_to_line();
     delay(100);
     pick_down_2();
@@ -88,7 +88,7 @@ void loop() // 程式循環
     back();
     delay(450);
     re_turn();
-    delay(550);
+    delay(540);
     return_to_line();
     delay(100);
     pick_down_2();
@@ -110,7 +110,7 @@ void loop() // 程式循環
     back();
     delay(450);
     re_turn();
-    delay(550);
+    delay(540);
     return_to_line();
     delay(100);
     pick_down_2();
@@ -226,7 +226,7 @@ void pickup_left()
     return_to_line();
     trail_cross();
     big_turn_right();
-    delay(250);
+    delay(300);
     while (!(analogRead(IR[4]) > 450))
     {
         big_turn_right();
