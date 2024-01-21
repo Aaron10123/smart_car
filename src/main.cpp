@@ -11,6 +11,7 @@ int mR = 6;
 int sL = 4;
 int sR = 7;
 Servo claw; // 爪子伺服馬達
+Servo arm;  // 手臂伺服馬達
 unsigned long duration_time_diff;
 /*################################函數宣告區################################*/
 void motor(int, int);
@@ -34,85 +35,129 @@ void pickup_left();
 void pickup_right();
 void pick_up();
 void pick_down();
+void pick_down_2();
+void arm_up();
+void arm_down();
 /*################################程式初始化################################*/
 void setup() // 程式初始化
 {
     my_init();
     trail_cross();
+    arm_down();
 
     pickup_middle(); // 取貨點(中)
 
     back();
-    delay(500);
+    delay(450);
     re_turn();
     delay(550);
     return_to_line();
+    delay(100);
+    pick_down_2();
     delay(100);
 
     pickup_left(); // 取貨點(左)
 
     back();
-    delay(500);
+    delay(450);
     re_turn();
     delay(550);
     return_to_line();
+    delay(100);
+    pick_down_2();
     delay(100);
 
     pickup_right(); // 取貨點(右)
 
     back();
-    delay(500);
+    delay(450);
     re_turn();
     delay(550);
     return_to_line();
+    delay(100);
+    pick_down_2();
     delay(100);
 }
 
 /*################################程式循環################################*/
 void loop() // 程式循環
 {
+
     pickup_middle(); // 取貨點(中)
 
     back();
-    delay(500);
+    delay(450);
     re_turn();
     delay(550);
     return_to_line();
+    delay(100);
+    pick_down_2();
     delay(100);
 
     pickup_left(); // 取貨點(左)
 
     back();
-    delay(500);
+    delay(450);
     re_turn();
     delay(550);
     return_to_line();
+    delay(100);
+    pick_down_2();
     delay(100);
 
     pickup_right(); // 取貨點(右)
 
     back();
-    delay(500);
+    delay(450);
     re_turn();
     delay(550);
     return_to_line();
+    delay(100);
+    pick_down_2();
     delay(100);
 }
 
 /*################################函數定義區################################*/
 
+void arm_up()
+{
+    arm.write(80); // 調整手臂角度範例
+}
+
+void arm_down()
+{
+    // arm.write(120); // 調整手臂角度範例
+    for (int i = 0; i < 3; i++)
+    {
+        arm.write(100 + 10 * i);
+        delay(100);
+    }
+}
+
 void pick_up()
 {
-    claw.write(100); // 調整爪子角度範例
+    claw.write(100); // 調整爪子角度
+    delay(100);
+    arm_up();
 }
+
 void pick_down()
 {
-    claw.write(40); // 調整爪子角度範例
+    arm_down();
+    delay(100);
+    claw.write(10); // 調整爪子角度
+}
+
+void pick_down_2()
+{
+    arm.write(120);
+    delay(100);
+    claw.write(20); // 調整爪子角度
 }
 void pickup_middle()
 {
     /*################前往第一個取貨點(中)################*/
-    pick_down();
+    pick_down_2();
     // trail_cross(); // 循跡到中間十字路口
 
     // 繼續前進直到IR1~IR3全部小於450，到達取貨點
@@ -130,6 +175,7 @@ void pickup_middle()
     /*################到達第一個取貨點(中)################*/
 
     pick_up();
+    arm_up();
     delay(500);
 
     /*################前往卸貨點################*/
@@ -138,16 +184,19 @@ void pickup_middle()
     trail_cross();    // 循跡到卸貨T字路口
     stop();
     /*################到達卸貨點################*/
+    stop();
+    delay(100);
     pick_down();
+    arm_up();
 }
 
 void pickup_left()
 {
     /*################前往第二個取貨點(左)################*/
-    pick_down();
+    pick_down_2();
     // trail_cross();
     delay(100);
-    while (!((analogRead(IR[0]) > 450)))
+    while (!((analogRead(IR[1]) > 450)))
     {
         big_turn_left();
     }
@@ -186,12 +235,15 @@ void pickup_left()
     trail_cross(); // 循跡到卸貨T字路口
     stop();
     /*################到達卸貨點################*/
+    stop();
+    delay(100);
     pick_down();
+    arm_up();
 }
 
 void pickup_right()
 {
-    pick_down();
+    pick_down_2();
     // trail_cross();
     delay(100);
     while (!((analogRead(IR[4]) > 450)))
@@ -200,6 +252,7 @@ void pickup_right()
     }
     stop();
     delay(100);
+
     duration_time_diff = millis();
     while (!(millis() - duration_time_diff >= 500))
     {
@@ -232,7 +285,10 @@ void pickup_right()
     trail_cross(); // 循跡到卸貨T字路口
     stop();
     /*################到達卸貨點################*/
+    stop();
+    delay(100);
     pick_down();
+    arm_up();
 }
 
 void my_init()
@@ -248,6 +304,7 @@ void my_init()
     pinMode(sR, OUTPUT);
 
     claw.attach(9);
+    arm.attach(10);
 }
 
 void return_to_line()
@@ -325,7 +382,7 @@ void forward()
 
 void back()
 {
-    motor(-100, -100);
+    motor(-120, -120);
 }
 void small_turn_left()
 {
@@ -339,21 +396,21 @@ void small_turn_right()
 
 void mid_turn_left()
 {
-    motor(0, 100);
+    motor(0, 110);
 }
 void mid_turn_right()
 {
-    motor(100, 0);
+    motor(110, 0);
 }
 
 void big_turn_left()
 {
-    motor(-120, 100);
+    motor(-150, 100);
 }
 
 void big_turn_right()
 {
-    motor(100, -120);
+    motor(100, -150);
 }
 
 void stop()
@@ -363,7 +420,7 @@ void stop()
 
 void re_turn()
 {
-    motor(-120, 75);
+    motor(-140, 100);
 }
 
 void motor(int speedL, int speedR)
