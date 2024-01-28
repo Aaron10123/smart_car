@@ -27,6 +27,7 @@ void stop();
 void back();
 void re_turn();
 void return_to_line();
+void return_to_line_2();
 void trail_cross();
 bool cross();
 void my_init();
@@ -48,9 +49,9 @@ void setup() // 程式初始化
     pickup_middle(); // 取貨點(中)
 
     back();
-    delay(450);
+    delay(500);
     re_turn();
-    delay(550);
+    delay(500);
     return_to_line();
     delay(100);
     pick_down_2();
@@ -59,9 +60,9 @@ void setup() // 程式初始化
     pickup_left(); // 取貨點(左)
 
     back();
-    delay(450);
+    delay(500);
     re_turn();
-    delay(550);
+    delay(500);
     return_to_line();
     delay(75);
     pick_down_2();
@@ -70,9 +71,9 @@ void setup() // 程式初始化
     pickup_right(); // 取貨點(右)
 
     back();
-    delay(450);
+    delay(500);
     re_turn();
-    delay(540);
+    delay(500);
     return_to_line();
     delay(100);
     pick_down_2();
@@ -86,10 +87,12 @@ void loop() // 程式循環
     pickup_middle(); // 取貨點(中)
 
     back();
-    delay(450);
+    delay(500);
     re_turn();
-    delay(540);
+    delay(500);
     return_to_line();
+    delay(100);
+    return_to_line_2();
     delay(100);
     pick_down_2();
     delay(100);
@@ -97,9 +100,9 @@ void loop() // 程式循環
     pickup_left(); // 取貨點(左)
 
     back();
-    delay(450);
+    delay(500);
     re_turn();
-    delay(550);
+    delay(500);
     return_to_line();
     delay(100);
     pick_down_2();
@@ -108,10 +111,12 @@ void loop() // 程式循環
     pickup_right(); // 取貨點(右)
 
     back();
-    delay(450);
+    delay(500);
     re_turn();
-    delay(540);
+    delay(500);
     return_to_line();
+    delay(100);
+    return_to_line_2();
     delay(100);
     pick_down_2();
     delay(100);
@@ -310,6 +315,14 @@ void my_init()
 void return_to_line()
 {
     while (!(analogRead(IR[0]) > 450))
+    {
+        re_turn();
+    }
+    stop();
+}
+void return_to_line_2()
+{
+    while (!(analogRead(IR[1]) > 450))
     {
         re_turn();
     }
