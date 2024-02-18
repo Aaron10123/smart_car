@@ -43,83 +43,86 @@ void arm_down();
 void setup() // 程式初始化
 {
     my_init();
+    pick_down();
     trail_cross();
-    arm_down();
+    big_turn_right();
+    trail_cross();
+    pick_up();  
 
-    pickup_middle(); // 取貨點(中)
+    // pickup_middle(); // 取貨點(中)
 
-    back();
-    delay(500);
-    re_turn();
-    delay(500);
-    return_to_line();
-    delay(100);
-    pick_down_2();
-    delay(100);
+    // back();
+    // delay(500);
+    // re_turn();
+    // delay(500);
+    // return_to_line();
+    // delay(100);
+    // pick_down_2();
+    // delay(100);
 
-    pickup_left(); // 取貨點(左)
+    // pickup_left(); // 取貨點(左)
 
-    back();
-    delay(500);
-    re_turn();
-    delay(500);
-    return_to_line();
-    delay(75);
-    pick_down_2();
-    delay(100);
+    // back();
+    // delay(500);
+    // re_turn();
+    // delay(500);
+    // return_to_line();
+    // delay(75);
+    // pick_down_2();
+    // delay(100);
 
-    pickup_right(); // 取貨點(右)
+    // pickup_right(); // 取貨點(右)
 
-    back();
-    delay(500);
-    re_turn();
-    delay(500);
-    return_to_line();
-    delay(100);
-    pick_down_2();
-    delay(100);
+    // back();
+    // delay(500);
+    // re_turn();
+    // delay(500);
+    // return_to_line();
+    // delay(100);
+    // pick_down_2();
+    // delay(100);
 }
 
 /*################################程式循環################################*/
 void loop() // 程式循環
 {
 
-    pickup_middle(); // 取貨點(中)
+    // pickup_middle(); // 取貨點(中)
 
-    back();
-    delay(500);
-    re_turn();
-    delay(500);
-    return_to_line();
-    delay(100);
-    return_to_line_2();
-    delay(100);
-    pick_down_2();
-    delay(100);
+    // back();
+    // delay(500);
+    // re_turn();
+    // delay(500);
+    // return_to_line();
+    // delay(100);
+    // return_to_line_2();
+    // delay(100);
+    // pick_down_2();
+    // delay(100);
 
-    pickup_left(); // 取貨點(左)
+    // pickup_left(); // 取貨點(左)
 
-    back();
-    delay(500);
-    re_turn();
-    delay(500);
-    return_to_line();
-    delay(100);
-    pick_down_2();
-    delay(100);
+    // back();
+    // delay(500);
+    // re_turn();
+    // delay(500);
+    // return_to_line();
+    // delay(100);
+    // pick_down_2();
+    // delay(100);
 
-    pickup_right(); // 取貨點(右)
+    // pickup_right(); // 取貨點(右)
 
-    back();
-    delay(500);
-    re_turn();
-    delay(500);
-    return_to_line();
-    delay(100);
-    return_to_line_2();
-    delay(100);
-    pick_down_2();
-    delay(100);
+    // back();
+    // delay(500);
+    // re_turn();
+    // delay(500);
+    // return_to_line();
+    // delay(100);
+    // return_to_line_2();
+    // delay(100);
+    // pick_down_2();
+    // delay(100);
 }
 
 /*################################函數定義區################################*/
@@ -365,6 +368,14 @@ void trail()
         if (analogRead(IR[1]) > 450)
         {
             mid_turn_left();
+        }
+        if (analogRead(IR[0]) > 450)
+        {
+            big_turn_left();
+        }
+        if (analogRead(IR[4]) > 450)
+        {
+            big_turn_right();
         }
         else if (analogRead(IR[3]) > 450)
         {
