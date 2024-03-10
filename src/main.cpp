@@ -83,15 +83,24 @@ void forward_to_white();
 void action_until_black_to_white(int IR, void (*action)());
 // 執行某個動作直到IR1~IR3其中一個看到黑色
 void action_until_black(void (*action)());
+
+void trail_test();
+
+void pick_A();
+void pick_B();
+void pick_C();
 /*################################程式初始化################################*/
 void setup() // 程式初始化
 {
+
     my_init();
-    pick_up();
-    pick_first();
-    pick_second();
-    pick_third();
-    pick_fourth();
+    trail_cross();
+    pick_A();
+    // pick_up();
+    // pick_first();
+    // pick_second();
+    // pick_third();
+    // pick_fourth();
 }
 
 /*################################程式循環################################*/
@@ -100,7 +109,120 @@ void loop() // 程式循環
 }
 
 /*################################函數定義區################################*/
+void pick_A() // A=左邊泡棉
+{
+    return_to_line_right();
+    pick_down();
+    while (!((analogRead(IR[1]) < 450) and (analogRead(IR[2]) < 450) and (analogRead(IR[3]) < 450)))
+    {
+        trail();
+        if (analogRead(IR[1]) < 450 and analogRead(IR[2]) < 450 and analogRead(IR[3]) < 450)
+        {
+            stop();
+            delay(100);
+        }
+    }
+    pick_up();
+    return_to_line_right();
+    trail_cross();
+    return_to_line_right();
+    trail_for_ms(1800);
+    pick_down();
+    back();
+    delay(500);
+    return_to_line_right();
+    trail_cross();
+    // /*###右邊結束回到路口面相白色的P###*/
+    return_to_line_right();
+    pick_down();
+    while (!((analogRead(IR[1]) < 450) and (analogRead(IR[2]) < 450) and (analogRead(IR[3]) < 450)))
+    {
+        trail();
+        if (analogRead(IR[1]) < 450 and analogRead(IR[2]) < 450 and analogRead(IR[3]) < 450)
+        {
+            stop();
+            delay(100);
+        }
+    }
+    pick_up();
+    return_to_line_right();
+    trail_cross();
+    return_to_line_right();
+    trail_cross();
+    forward();
+    delay(500);
+    stop();
+    delay(100);
+    trail_cross();
+    // 直走直到IR1~IR3其中有一顆燈>450
+    while (!(analogRead(IR[1]) > 450 or analogRead(IR[2]) > 450 or analogRead(IR[3]) > 450))
+    {
+        forward();
+    }
+    stop();
+    delay(100);
+    trail_cross();
+    return_to_line_left();
+    pick_down_B();
 
+    /*#########################################*/
+    // pick_down();
+    // back();
+    // delay(400);
+    // return_to_line_right();
+    // trail_cross();
+    // trail_for_ms(650);
+    // pick_up();
+    // trail_for_ms(550);
+    // pick_down();
+    // back();
+    // delay(500);
+    // return_to_line_right();
+    // trail_cross();
+    // return_to_line_left();
+    // action_until_black(re_turn_left);
+    // while (!((analogRead(IR[1]) < 450) and (analogRead(IR[2]) < 450) and (analogRead(IR[3]) < 450)))
+    // {
+    //     trail();
+    //     if (analogRead(IR[1]) < 450 and analogRead(IR[2]) < 450 and analogRead(IR[3]) < 450)
+    //     {
+    //         stop();
+    //         delay(100);
+    //     }
+    // }
+    // pick_up();
+    // return_to_line_right();
+    // trail_cross();
+    // return_to_line_right();
+    // trail_for_ms(1500);
+    // pick_down();
+}
+
+void pick_B()
+{
+    trail_for_ms(650);
+    pick_up();
+    return_to_line_left();
+    pick_down();
+    while (!((analogRead(IR[1]) < 450) and (analogRead(IR[2]) < 450) and (analogRead(IR[3]) < 450)))
+    {
+        trail();
+        if (analogRead(IR[1]) < 450 and analogRead(IR[2]) < 450 and analogRead(IR[3]) < 450)
+        {
+            stop();
+            delay(100);
+        }
+    }
+    pick_up();
+    return_to_line_right();
+    trail_cross();
+    return_to_line_left();
+    trail_for_ms(1500);
+    pick_down();
+}
+void pick_c()
+{
+}
 void pick_first()
 {
     trail_cross();
@@ -336,6 +458,7 @@ void trail_cross()
     while (!cross())
     {
         trail();
+        // trail_test();
     }
     while (!(analogRead(IR[1]) < 450 or analogRead(IR[2]) < 450 or analogRead(IR[3]) < 450))
     {
@@ -372,6 +495,41 @@ void trail()
         else if (analogRead(IR[3]) > 450)
         {
             big_turn_right();
+        }
+    }
+}
+void trail_test()
+{
+    if (analogRead(IR[2]) > 450)
+    {
+        if (analogRead(IR[1]) > 450)
+        {
+            // mid_turn_left();
+            motor(0, 190);
+        }
+        else if (analogRead(IR[3]) > 450)
+        {
+            // mid_turn_right();
+            motor(135, 0);
+        }
+        else if (analogRead(IR[1]) < 450 and analogRead(IR[3]) < 450)
+
+        {
+            // forward();
+            motor(130, 130);
+        }
+    }
+    else
+    {
+        if (analogRead(IR[1]) > 450)
+        {
+            // big_turn_left();
+            motor(-190, 130);
+        }
+        else if (analogRead(IR[3]) > 450)
+        {
+            // big_turn_right();
+            motor(105, -155);
         }
     }
 }
