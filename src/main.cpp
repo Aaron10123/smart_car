@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <Servo.h>
+#include <Pixetto.h>
 
 /*################################變數宣告區################################*/
 // IR sansor A1~A5
@@ -10,8 +11,9 @@ int mR = 6;
 // 方向控制:左邊馬達為4，右邊馬達為7
 int sL = 4;
 int sR = 7;
-Servo claw; // 爪子伺服馬達
-Servo arm;  // 手臂伺服馬達
+Servo claw;              // 爪子伺服馬達
+Servo arm;               // 手臂伺服馬達
+Pixetto pxtSerial(2, 3); // 鏡頭辨識 RX(黃), TX(白) = { 2, 3 }
 /*################################函數宣告區################################*/
 // 馬達控制
 void motor(int, int);
@@ -83,20 +85,50 @@ void forward_to_white();
 void action_until_black_to_white(int IR, void (*action)());
 // 執行某個動作直到IR1~IR3其中一個看到黑色
 void action_until_black(void (*action)());
-
+// 新的循跡測試
 void trail_test();
-
+// 左邊是目標物
 void pick_A();
+// 中間是目標物
 void pick_B();
+// 右邊是目標物
 void pick_C();
+// 偵測鏡頭辨識物體，輸入秒數，計算該秒數內偵測到最多的數值確定後回傳目標物的ID，-1為無偵測到物體，0為第一個物體，1為第二個物體，2為第三個物體
+int detectObject(unsigned long ms);
+// 略過白色的P
+void skip_white_P();
+
+void re_turn_right_test();
+
+void re_turn_left_test();
 /*################################程式初始化################################*/
 void setup() // 程式初始化
 {
 
     my_init();
+    arm.write(95);
     trail_cross();
-    pick_A();
-    // pick_up();
+    return_to_line_left();
+    if (detectObject(1000) == 0)
+    {
+        pick_A();
+    }
+    else
+    {
+
+        return_to_line_right();
+        if (detectObject(1000) == 0)
+        {
+            pick_B();
+        }
+        else
+        {
+
+            return_to_line_right();
+            pick_C();
+        }
+    }
+
     // pick_first();
     // pick_second();
     // pick_third();
@@ -111,7 +143,7 @@ void loop() // 程式循環
 /*################################函數定義區################################*/
 void pick_A() // A=左邊泡棉
 {
-    return_to_line_right();
+    // return_to_line_right();
     pick_down();
     while (!((analogRead(IR[1]) < 450) and (analogRead(IR[2]) < 450) and (analogRead(IR[3]) < 450)))
     {
@@ -127,7 +159,7 @@ void pick_A() // A=左邊泡棉
     trail_cross();
     return_to_line_right();
     trail_for_ms(1800);
-    pick_down();
+    claw_open();
     back();
     delay(500);
     return_to_line_right();
@@ -149,59 +181,42 @@ void pick_A() // A=左邊泡棉
     trail_cross();
     return_to_line_right();
     trail_cross();
-    forward();
-    delay(500);
-    stop();
-    delay(100);
-    trail_cross();
-    // 直走直到IR1~IR3其中有一顆燈>450
-    while (!(analogRead(IR[1]) > 450 or analogRead(IR[2]) > 450 or analogRead(IR[3]) > 450))
-    {
-        forward();
-    }
+    skip_white_P();
     stop();
     delay(100);
     trail_cross();
     return_to_line_left();
     pick_down_B();
-
-    /*#########################################*/
-    // pick_down();
-    // back();
-    // delay(400);
-    // return_to_line_right();
-    // trail_cross();
-    // trail_for_ms(650);
-    // pick_up();
-    // trail_for_ms(550);
-    // pick_down();
-    // back();
-    // delay(500);
-    // return_to_line_right();
-    // trail_cross();
-    // return_to_line_left();
-    // action_until_black(re_turn_left);
-    // while (!((analogRead(IR[1]) < 450) and (analogRead(IR[2]) < 450) and (analogRead(IR[3]) < 450)))
-    // {
-    //     trail();
-    //     if (analogRead(IR[1]) < 450 and analogRead(IR[2]) < 450 and analogRead(IR[3]) < 450)
-    //     {
-    //         stop();
-    //         delay(100);
-    //     }
-    // }
-    // pick_up();
-    // return_to_line_right();
-    // trail_cross();
-    // return_to_line_right();
-    // trail_for_ms(1500);
-    // pick_down();
 }
 
 void pick_B()
 {
-    trail_for_ms(650);
+    pick_down();
+    trail_for_ms(750);
     pick_up();
+    back();
+    delay(1000);
+    stop();
+    big_turn_right();
+    delay(100);
+    return_to_line_right();
+    trail_cross();
+    skip_white_P();
+    stop();
+    delay(100);
+    trail_cross();
+    return_to_line_left();
+    pick_down_B();
+    back();
+    delay(200);
+    re_turn_right();
+    delay(100);
+    return_to_line_right();
+    trail_cross();
+    return_to_line_right();
+    trail_cross();
+    trail_cross();
+    skip_white_P();
     return_to_line_left();
     pick_down();
     while (!((analogRead(IR[1]) < 450) and (analogRead(IR[2]) < 450) and (analogRead(IR[3]) < 450)))
@@ -219,9 +234,84 @@ void pick_B()
     return_to_line_left();
     trail_for_ms(1500);
     pick_down();
+    back();
+    delay(850);
+    stop();
+    return_to_line_right();
+    delay(100);
+    while (!((analogRead(IR[1]) < 450) and (analogRead(IR[2]) < 450) and (analogRead(IR[3]) < 450)))
+    {
+        trail();
+        if (analogRead(IR[1]) < 450 and analogRead(IR[2]) < 450 and analogRead(IR[3]) < 450)
+        {
+            stop();
+            delay(100);
+        }
+    }
+    stop();
+    pick_up();
+    back();
+    delay(600);
+    stop();
+    return_to_line_left();
+    trail_for_ms(1800);
+    claw_open();
 }
-void pick_c()
+void pick_C()
 {
+    // return_to_line_left();
+    pick_down();
+    while (!((analogRead(IR[1]) < 450) and (analogRead(IR[2]) < 450) and (analogRead(IR[3]) < 450)))
+    {
+        trail();
+        if (analogRead(IR[1]) < 450 and analogRead(IR[2]) < 450 and analogRead(IR[3]) < 450)
+        {
+            stop();
+            delay(100);
+        }
+    }
+    pick_up();
+    return_to_line_right();
+    trail_cross();
+    return_to_line_left();
+    trail_for_ms(1800);
+    pick_down();
+    back();
+    delay(500);
+    return_to_line_right();
+    trail_cross();
+    // /*###左邊結束回到路口面相白色的P###*/
+    return_to_line_left();
+    pick_down();
+    while (!((analogRead(IR[1]) < 450) and (analogRead(IR[2]) < 450) and (analogRead(IR[3]) < 450)))
+    {
+        trail();
+        if (analogRead(IR[1]) < 450 and analogRead(IR[2]) < 450 and analogRead(IR[3]) < 450)
+        {
+            stop();
+            delay(100);
+        }
+    }
+    pick_up();
+    return_to_line_right();
+    trail_cross();
+    return_to_line_left();
+    trail_cross();
+    forward();
+    delay(500);
+    stop();
+    delay(100);
+    trail_cross();
+    // 直走直到IR1~IR3其中有一顆燈>450
+    // while (!(analogRead(IR[1]) > 450 or analogRead(IR[2]) > 450 or analogRead(IR[3]) > 450))
+    // {
+    //     forward();
+    // }
+    stop();
+    delay(100);
+    trail_cross();
+    return_to_line_left();
+    pick_down_B();
 }
 void pick_first()
 {
@@ -321,6 +411,15 @@ void pick_down_B()
     delay(500);
 }
 
+void skip_white_P()
+{
+    forward();
+    delay(600);
+    stop();
+    delay(1000);
+    trail_cross();
+}
+
 void action_until_black(void (*action)())
 {
     while (!(analogRead(IR[1]) > 450 or analogRead(IR[2]) > 450 or analogRead(IR[3]) > 450))
@@ -366,13 +465,13 @@ void trail_for_ms(unsigned long ms)
 
 void arm_up()
 {
-    arm.write(80); // 調整手臂角度範例
+    arm.write(65); // 調整手臂角度範例
 }
 
 void arm_down()
 {
     // arm.write(120); // 調整手臂角度範例
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 5; i++)
     {
         arm.write(100 + 10 * i);
         delay(100);
@@ -425,6 +524,7 @@ void my_init()
 
     claw.attach(9);
     arm.attach(10);
+    pxtSerial.begin(); // 初始化Pixetto
 }
 
 void return_to_line_left()
@@ -432,6 +532,7 @@ void return_to_line_left()
     while (!(analogRead(IR[0]) > 450))
     {
         re_turn_left();
+        // re_turn_left_test();
     }
     stop();
 }
@@ -441,6 +542,7 @@ void return_to_line_right()
     while (!(analogRead(IR[4]) > 450))
     {
         re_turn_right();
+        // re_turn_right_test();
     }
     stop();
 }
@@ -505,18 +607,18 @@ void trail_test()
         if (analogRead(IR[1]) > 450)
         {
             // mid_turn_left();
-            motor(0, 190);
+            motor(0, 200);
         }
         else if (analogRead(IR[3]) > 450)
         {
             // mid_turn_right();
-            motor(135, 0);
+            motor(145, 0);
         }
         else if (analogRead(IR[1]) < 450 and analogRead(IR[3]) < 450)
 
         {
             // forward();
-            motor(130, 130);
+            motor(150, 150);
         }
     }
     else
@@ -524,12 +626,12 @@ void trail_test()
         if (analogRead(IR[1]) > 450)
         {
             // big_turn_left();
-            motor(-190, 130);
+            motor(-200, 140);
         }
         else if (analogRead(IR[3]) > 450)
         {
             // big_turn_right();
-            motor(105, -155);
+            motor(115, -165);
         }
     }
 }
@@ -601,6 +703,16 @@ void re_turn_right()
     motor(110, -140);
 }
 
+void re_turn_left_test()
+{
+    motor(-155, 110);
+}
+
+void re_turn_right_test()
+{
+    motor(120, -150);
+}
+
 void motor(int speedL, int speedR)
 {
     // 判斷speedL跟speedR正負號決定方向
@@ -609,4 +721,48 @@ void motor(int speedL, int speedR)
 
     analogWrite(mL, abs(speedL)); // 左邊馬達速度設定
     analogWrite(mR, abs(speedR)); // 右邊馬達速度設定
+}
+
+#define MAX_OBJECTS 3 // 物件 ID 的範圍為 0 到 2
+
+int detectObject(unsigned long ms)
+{
+    // 初始化物件偵測次數的 array
+    int objectCounts[MAX_OBJECTS] = {0};
+
+    while (pxtSerial.isDetected() == false)
+    {
+        /* code */
+    }
+
+    unsigned long start_time = millis();
+    while (millis() - start_time < ms)
+    {
+        if (pxtSerial.isDetected())
+        {
+            // 增加對應物件的偵測次數
+            int objectID = pxtSerial.getTypeID();
+            if (objectID >= 0 && objectID < MAX_OBJECTS)
+            {
+                objectCounts[objectID]++;
+            }
+        }
+    }
+
+    // 找出偵測次數最多的物件
+    int maxCount = 0;
+    int maxObjectID = -1;
+    for (int i = 0; i < MAX_OBJECTS; i++)
+    {
+        if (objectCounts[i] > maxCount)
+        {
+            maxCount = objectCounts[i];
+            maxObjectID = i;
+        }
+        // Serial.print(objectCounts[i]);
+        // Serial.print(" ");
+    }
+
+    // 回傳偵測次數最多的物件的 ID
+    return maxObjectID;
 }
