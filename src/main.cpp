@@ -106,25 +106,28 @@ void setup() // 程式初始化
 {
 
     my_init();
-    arm.write(95);
+    arm.write(100);
     trail_cross();
     return_to_line_left();
     if (detectObject(1000) == 0)
     {
+        return_to_line_right();
+        stop();
+        delay(1000);
         pick_A();
     }
     else
     {
 
         return_to_line_right();
+        stop();
+        delay(1000);
         if (detectObject(1000) == 0)
         {
             pick_B();
         }
         else
         {
-
-            return_to_line_right();
             pick_C();
         }
     }
@@ -143,7 +146,7 @@ void loop() // 程式循環
 /*################################函數定義區################################*/
 void pick_A() // A=左邊泡棉
 {
-    // return_to_line_right();
+    return_to_line_right();
     pick_down();
     while (!((analogRead(IR[1]) < 450) and (analogRead(IR[2]) < 450) and (analogRead(IR[3]) < 450)))
     {
