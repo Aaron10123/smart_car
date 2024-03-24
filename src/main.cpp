@@ -107,34 +107,39 @@ void setup() // 程式初始化
 
     my_init();
     arm.write(100);
-    trail_cross();
-    return_to_line_left();
-    if (detectObject(1000) == 0)
-    {
-        return_to_line_right();
-        stop();
-        delay(1000);
-        pick_A();
-    }
-    else
-    {
+    // trail_cross();
+    // return_to_line_left();
+    // re_turn_left();
+    // delay(50);
+    // stop();
+    // if (detectObject(1000) == 0)
+    // {
+    //     return_to_line_right();
+    //     stop();
+    //     delay(1000);
+    //     pick_A();
+    // }
+    // else
+    // {
 
-        return_to_line_right();
-        stop();
-        delay(1000);
-        if (detectObject(1000) == 0)
-        {
-            pick_B();
-        }
-        else
-        {
-            pick_C();
-        }
-    }
+    //     return_to_line_right();
+    //     re_turn_right();
+    //     delay(50);
+    //     stop();
+    //     delay(1000);
+    //     if (detectObject(1000) == 0)
+    //     {
+    //         pick_B();
+    //     }
+    //     else
+    //     {
+    //         pick_C();
+    //     }
+    // }
 
-    // pick_first();
-    // pick_second();
-    // pick_third();
+    pick_first();
+    pick_second();
+    pick_third();
     // pick_fourth();
 }
 
@@ -161,7 +166,7 @@ void pick_A() // A=左邊泡棉
     return_to_line_right();
     trail_cross();
     return_to_line_right();
-    trail_for_ms(1800);
+    trail_for_ms(1600);
     claw_open();
     back();
     delay(500);
@@ -195,10 +200,10 @@ void pick_A() // A=左邊泡棉
 void pick_B()
 {
     pick_down();
-    trail_for_ms(750);
+    trail_for_ms(1050);
     pick_up();
     back();
-    delay(1000);
+    delay(1200);
     stop();
     big_turn_right();
     delay(100);
@@ -235,7 +240,7 @@ void pick_B()
     return_to_line_right();
     trail_cross();
     return_to_line_left();
-    trail_for_ms(1500);
+    trail_for_ms(1600);
     pick_down();
     back();
     delay(850);
@@ -277,7 +282,7 @@ void pick_C()
     return_to_line_right();
     trail_cross();
     return_to_line_left();
-    trail_for_ms(1800);
+    trail_for_ms(1600);
     pick_down();
     back();
     delay(500);
@@ -405,7 +410,7 @@ void pick_down_B()
 {
     trail_for_ms(1000);
     big_turn_right();
-    delay(450);
+    delay(400);
     stop();
     forward();
     delay(300);
@@ -417,7 +422,7 @@ void pick_down_B()
 void skip_white_P()
 {
     forward();
-    delay(600);
+    delay(700);
     stop();
     delay(1000);
     trail_cross();
