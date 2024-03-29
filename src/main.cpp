@@ -166,6 +166,7 @@ void pick_A() // A=左邊泡棉
     }
     pick_up();
     return_to_line_right();
+    left_fix();
     trail_cross();
     return_to_line_right();
     trail_for_ms(1500);
@@ -192,6 +193,7 @@ void pick_A() // A=左邊泡棉
     left_fix();
     trail_cross();
     return_to_line_right();
+    right_fix();
     trail_cross();
     skip_white_P();
     stop();
